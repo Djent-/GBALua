@@ -1,0 +1,87 @@
+CRT - crt0.S v1.2x
+LS - Linker Script v1.3
+------------------
+
+NOTE: This linker script defines the RAM & ROM start addresses.
+      In order for it to work properly, remove -Ttext and -Tbss
+      linker options from your makefile if they are present.
+
+* C++ support added (LS)
+
+* Interrupts support (CRT)
+
+* New Sections (CRT/LS) - The following section types have been added:
+    .iwram, .iwram0, .iwram1, .iwram2, ..., .iwram9
+    .ewram, .ewram0, .ewram1, .ewram2, ..., .ewram9
+
+* Overlay support (CRT/LS) - Sections .iwram0 - .iwram9 all overlay one
+    section of memory in Internal WRAM. Sections .ewram0 -
+    .ewram9 all overlay one section of memory in External WRAM.
+
+* Initialized data support (CRT) - In v1.1, support for initialized
+    variables (.data section copy from ROM to RAM) was added. In the
+    latest release, sections .iwram, .iwram0, .ewram, and .ewram0 are
+    now supported as well and any initialized data and/or code in these
+    sections are copied from ROM to RAM *if* there is anything in these
+    sections.
+
+* Far function / procedure support (CRT) - GCC versions older than v3.0
+    can not do calls to far addresses (i.e. Internal WRAM or External
+    WRAM) unless you use this function or similar function pointer code.
+
+* Multiboot/Cart boot Selection (CRT/LS) - If the variable __gba_multiboot is
+    defined (probably should be in your main project file) then code
+    is generated which will run as a multiboot image (code starts
+    at 0x2000000) or as a normal flash cart / emulator image.
+    (i.e. crt0.s copies code from ROM to EWRAM if started in cart
+    or emulator.) If this variable is not defined then code is
+    generated for flash cart / emulator only operation (code starts
+    at 0x8000000).
+
+* __boot_method & __slave_number labels (CRT) - When running code in
+    multiboot mode, the byte value at these addresses can be read:
+      extern unsigned char __boot method; (0=ROM boot, 3=Multiplay boot)
+      extern unsigned char __slave_number; (1=slave#1, 2=slave#2, 3=slave#3)
+    NOTE: These variables are correct on real hardware but they may or
+    may not be supported by various emulators.
+
+* *text.iwram* (LS) - The .text (code) section of these type files are put
+    into the section .iwram. All other sections in these type files
+    are unaffected. (Example file names: mycode.text.iwram.o,
+    myfile.text.iwram, intext.iwram)
+
+* *all.rodata* (LS) - All sections in these type files are put into the
+   .rodata section. (Example files: myfile.all.rodata.o, myfile.all.rodata)
+
+
+
+ Here is some example code which enables multiboot compatible compiles:
+
+      #define MULTIBOOT volatile const u8 __gba_multiboot;
+      MULTIBOOT
+
+ Here is some example code which puts code in Internal WRAM and then
+does a far function call to execute this code:
+
+   typedef   unsigned int   u32;
+   #define IN_IWRAM __attribute__ ((section (".iwram")))
+   extern u32 __FarFunction (u32 (*ptr)(), ...);  // Reference to routine in crt0.S
+   extern void __FarProcedure (void (*ptr)(), ...);  // Reference to routine in crt0.S
+   u32 IWRAMCode (u32 *FuncAddr, int param1, int param2) IN_IWRAM;
+
+
+   u32 IWRAMCode (u32 *FuncAddr, u32 param1, u32 param2)
+      {
+      u32 SomeValue;
+      // Note: The first parameter for this function MUST be
+      //  the *FuncAddr. Do NOT remove this parameter even
+      //  though you probably may not need it.
+      ...
+      return (SomeValue);
+      }
+
+   void AgbMain (void)
+      {
+      u32 ReturnValue = __FarFunction (IWRAMCode, 1, 2);
+      }
+
