@@ -1,7 +1,7 @@
 GBALua
 ======
 
-Gameboy Advance development environment to use Lua. I had to use my serious CSI Google skills to even find this, so I figured it would be easier for other people to find if I put it on GitHub. Last I can tell, it was last updated in 2002 - 12 years ago at the time I'm writing this, and is obviously not using the newest version of Lua. I am not qualified to go through the code and figure out how to support whatever the latest version of Lua is, but maybe I will be someday.
+Gameboy Advance development environment to use Lua. I had to use my serious CSI Google skills to even find this, so I figured it would be easier for other people to find if I put it on GitHub. Last I can tell, it was last updated in 2002 - 12 years ago at the time I'm writing this, and is obviously not using the newest version of Lua. I am not qualified to go through the code and figure out how to support whatever the latest version of Lua is, but maybe I will be someday. I also have no idea how to use this or if it's even usable, so you'll have to figure that out for yourself.
 
 ======
 From http://www.gatesboy.com/Lua/Documentation/FAQ.html
